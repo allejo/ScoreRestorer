@@ -19,7 +19,6 @@ Score Restorer
 #include <map>
 
 #include "bzfsAPI.h"
-#include "bztoolkit/bzToolkitAPI.h"
 
 // Define plugin name
 const std::string PLUGIN_NAME = "Score Restorer";
@@ -195,7 +194,7 @@ bool ScoreRestorer::SlashCommand(int playerID, bz_ApiString command, bz_ApiStrin
             std::string victim = params->get(2).c_str();
             std::string points = params->get(3).c_str();
 
-            bz_BasePlayerRecord* pr = bztk_getPlayerFromCallsignOrID(victim);
+            bz_BasePlayerRecord* pr = bz_getPlayerBySlotOrCallsign(victim);
 
             if (pr)
             {
@@ -282,7 +281,7 @@ bool ScoreRestorer::SlashCommand(int playerID, bz_ApiString command, bz_ApiStrin
         }
         else if (action == "clear")
         {
-            bz_BasePlayerRecord* pr = bztk_getPlayerFromCallsignOrID(victim);
+            bz_BasePlayerRecord* pr = bz_getPlayerBySlotOrCallsign(victim);
 
             if (pr)
             {
