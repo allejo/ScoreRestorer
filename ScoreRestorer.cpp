@@ -17,6 +17,7 @@ Score Restorer
 */
 
 #include <map>
+#include <sstream>
 
 #include "bzfsAPI.h"
 
