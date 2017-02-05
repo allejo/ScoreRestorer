@@ -170,20 +170,21 @@ bool ScoreRestorer::SlashCommand(int playerID, bz_ApiString command, bz_ApiStrin
         }
 
         std::string action = params->get(0).c_str();
-        std::string change = params->get(1).c_str();
-        std::string victim = params->get(2).c_str();
-        std::string points = params->get(3).c_str();
-
-        std::unique_ptr<bz_BasePlayerRecord> pr(bz_getPlayerBySlotOrCallsign(victim.c_str()));
-
-        if (!pr)
-        {
-            bz_sendTextMessagef(BZ_SERVER, playerID, "player %s not found", victim.c_str());
-            return true;
-        }
 
         if (action == "set" || action == "increase")
         {
+            std::string change = params->get(1).c_str();
+            std::string victim = params->get(2).c_str();
+            std::string points = params->get(3).c_str();
+
+            std::unique_ptr<bz_BasePlayerRecord> target(bz_getPlayerBySlotOrCallsign(victim.c_str()));
+
+            if (!target)
+            {
+                bz_sendTextMessagef(BZ_SERVER, playerID, "player %s not found", victim.c_str());
+                return true;
+            }
+
             int pointChange = 0;
 
             std::string targetPhrase = "";
@@ -193,11 +194,11 @@ bool ScoreRestorer::SlashCommand(int playerID, bz_ApiString command, bz_ApiStrin
             {
                 if (action == "set")
                 {
-                    bz_setPlayerWins(pr->playerID, pointChange);
+                    bz_setPlayerWins(target->playerID, pointChange);
                 }
                 else if (action == "increase")
                 {
-                    bz_incrementPlayerWins(pr->playerID, pointChange);
+                    bz_incrementPlayerWins(target->playerID, pointChange);
                 }
 
                 targetPhrase = "kill";
@@ -206,11 +207,11 @@ bool ScoreRestorer::SlashCommand(int playerID, bz_ApiString command, bz_ApiStrin
             {
                 if (action == "set")
                 {
-                    bz_setPlayerLosses(pr->playerID, pointChange);
+                    bz_setPlayerLosses(target->playerID, pointChange);
                 }
                 else if (action == "increase")
                 {
-                    bz_incrementPlayerLosses(pr->playerID, pointChange);
+                    bz_incrementPlayerLosses(target->playerID, pointChange);
                 }
 
                 targetPhrase = "death";
@@ -219,17 +220,17 @@ bool ScoreRestorer::SlashCommand(int playerID, bz_ApiString command, bz_ApiStrin
             {
                 if (action == "set")
                 {
-                    bz_setPlayerTKs(pr->playerID, pointChange);
+                    bz_setPlayerTKs(target->playerID, pointChange);
                 }
                 else if (action == "increase")
                 {
-                    bz_incrementPlayerTKs(pr->playerID, pointChange);
+                    bz_incrementPlayerTKs(target->playerID, pointChange);
                 }
 
                 targetPhrase = "teamkill";
             }
 
-            bz_sendTextMessagef(BZ_SERVER, pr->playerID, "%s has %s your %s count %s %d",
+            bz_sendTextMessagef(BZ_SERVER, target->playerID, "%s has %s your %s count %s %d",
                                 bz_getPlayerCallsign(playerID),
                                 (action == "set") ? "set" : "increased",
                                 targetPhrase.c_str(),
@@ -238,7 +239,7 @@ bool ScoreRestorer::SlashCommand(int playerID, bz_ApiString command, bz_ApiStrin
 
             bz_sendTextMessagef(BZ_SERVER, playerID, "You have %s %s's %s count %s %d",
                                 (action == "set") ? "set" : "increased",
-                                bz_getPlayerCallsign(pr->playerID),
+                                bz_getPlayerCallsign(target->playerID),
                                 targetPhrase.c_str(),
                                 (action == "set") ? "to" : "by",
                                 pointChange);
@@ -246,17 +247,27 @@ bool ScoreRestorer::SlashCommand(int playerID, bz_ApiString command, bz_ApiStrin
             bz_sendTextMessagef(BZ_SERVER, eAdministrators, "%s has %s %s's %s count %s %d",
                                 bz_getPlayerCallsign(playerID),
                                 (action == "set") ? "set" : "increased",
-                                bz_getPlayerCallsign(pr->playerID),
+                                bz_getPlayerCallsign(target->playerID),
                                 targetPhrase.c_str(),
                                 (action == "set") ? "to" : "by",
                                 pointChange);
         }
         else if (action == "clear")
         {
-            bz_resetPlayerScore(pr->playerID);
-            bz_sendTextMessagef(BZ_SERVER, pr->playerID, "Your score has been cleared by %s", bz_getPlayerCallsign(playerID));
-            bz_sendTextMessagef(BZ_SERVER, playerID, "You have cleared %s's score", bz_getPlayerCallsign(pr->playerID));
-            bz_sendTextMessagef(BZ_SERVER, eAdministrators, "%s has cleared %s's score", bz_getPlayerCallsign(playerID), bz_getPlayerCallsign(pr->playerID));
+            std::string victim = params->get(1).c_str();
+
+            std::unique_ptr<bz_BasePlayerRecord> target(bz_getPlayerBySlotOrCallsign(victim.c_str()));
+
+            if (!target)
+            {
+                bz_sendTextMessagef(BZ_SERVER, playerID, "player %s not found", victim.c_str());
+                return true;
+            }
+
+            bz_resetPlayerScore(target->playerID);
+            bz_sendTextMessagef(BZ_SERVER, target->playerID, "Your score has been cleared by %s", bz_getPlayerCallsign(playerID));
+            bz_sendTextMessagef(BZ_SERVER, playerID, "You have cleared %s's score", bz_getPlayerCallsign(target->playerID));
+            bz_sendTextMessagef(BZ_SERVER, eAdministrators, "%s has cleared %s's score", bz_getPlayerCallsign(playerID), bz_getPlayerCallsign(target->playerID));
         }
     }
 
