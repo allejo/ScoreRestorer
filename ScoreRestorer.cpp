@@ -122,7 +122,7 @@ void ScoreRestorer::Event (bz_EventData *eventData)
                             savedRecords.erase(playerCallsign);
                         }
                     }
-                    else // The record has expired, so let's erase it
+                    else
                     {
                         savedRecords.erase(playerCallsign);
                     }
@@ -138,15 +138,7 @@ void ScoreRestorer::Event (bz_EventData *eventData)
             // We'll store callsigns in lower case for sanity's sake
             std::string playerCallsign = bz_tolower(partData->record->callsign.c_str());
 
-            // Check if we have a record and they just left the observer team in order to extend
-            // the expiration time
-            if (savedRecords.count(playerCallsign) && partData->record->team == eObservers)
-            {
-                PlayerRecord &record = savedRecords[playerCallsign];
-
-                record.expireTime = bz_getCurrentTime();
-            }
-            else // They don't have a record, so create one
+            if (!savedRecords.count(playerCallsign))
             {
                 PlayerRecord newRecord;
 
@@ -155,11 +147,12 @@ void ScoreRestorer::Event (bz_EventData *eventData)
                 newRecord.wins = partData->record->wins;
                 newRecord.losses = partData->record->losses;
                 newRecord.teamKills = partData->record->teamKills;
+                newRecord.expireTime = bz_getCurrentTime();
 
                 savedRecords[playerCallsign] = newRecord;
             }
         }
-            break;
+        break;
 
         default: break;
     }
