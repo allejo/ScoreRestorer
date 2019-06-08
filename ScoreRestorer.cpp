@@ -29,7 +29,7 @@ const char* PLUGIN_NAME = "Score Restorer";
 const int MAJOR = 1;
 const int MINOR = 1;
 const int REV = 0;
-const int BUILD = 2;
+const int BUILD = 14;
 
 class ScoreRestorer : public bz_Plugin
 {
