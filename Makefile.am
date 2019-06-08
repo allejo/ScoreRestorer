@@ -10,10 +10,12 @@ AM_CFLAGS = $(CONF_CFLAGS)
 AM_CXXFLAGS = $(CONF_CXXFLAGS)
 
 EXTRA_DIST = \
-	README.ScoreRestorer.txt \
+	LICENSE.md \
+	README.md \
 	ScoreRestorer.def \
 	ScoreRestorer.sln \
-	ScoreRestorer.vcxproj
+	ScoreRestorer.vcxproj \
+	ScoreRestorer.vcxproj.filters
 
 MAINTAINERCLEANFILES =	\
 	Makefile.in
