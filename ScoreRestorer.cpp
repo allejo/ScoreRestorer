@@ -24,12 +24,13 @@
 
 #include "bzfsAPI.h"
 
-const char* PLUGIN_NAME = "Score Restorer";
+// Define plugin name
+const std::string PLUGIN_NAME = "Score Restorer";
 
 const int MAJOR = 1;
 const int MINOR = 1;
 const int REV = 0;
-const int BUILD = 14;
+const int BUILD = 15;
 
 class ScoreRestorer : public bz_Plugin
 {
@@ -60,14 +61,14 @@ BZ_PLUGIN(ScoreRestorer)
 
 const char* ScoreRestorer::Name (void)
 {
-    static const char* pluginBuild;
+    static std::string pluginName;
 
-    if (!pluginBuild)
+    if (pluginName.empty())
     {
-        pluginBuild = bz_format("%s %d.%d.%d (%d)", PLUGIN_NAME, MAJOR, MINOR, REV, BUILD);
+        pluginName = bz_format("%s %d.%d.%d (%d)", PLUGIN_NAME.c_str(), MAJOR, MINOR, REV, BUILD);
     }
 
-    return pluginBuild;
+    return pluginName.c_str();
 }
 
 void ScoreRestorer::Init (const char* /*commandLine*/)
