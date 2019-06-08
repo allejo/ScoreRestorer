@@ -39,6 +39,7 @@ public:
     virtual void Event (bz_EventData *eventData);
     virtual void Cleanup (void);
 
+private:
     struct PlayerRecord
     {
         std::string callsign;
@@ -90,11 +91,10 @@ void ScoreRestorer::Event (bz_EventData *eventData)
 {
     switch (eventData->eventType)
     {
-        case bz_ePlayerJoinEvent: // This event is called each time a player joins the game
+        case bz_ePlayerJoinEvent:
         {
             bz_PlayerJoinPartEventData_V1* joinData = (bz_PlayerJoinPartEventData_V1*)eventData;
 
-            // We'll store callsigns in lower case for sanity's sake
             std::string playerCallsign = bz_tolower(joinData->record->callsign.c_str());
 
             // Check if we have a record
@@ -120,11 +120,14 @@ void ScoreRestorer::Event (bz_EventData *eventData)
 
                             bz_sendTextMessage(BZ_SERVER, joinData->playerID, "Your score has been restored.");
 
+                            // Erase the record because we've used it. When this player leaves, a new record will be
+                            // saved for them.
                             savedRecords.erase(playerCallsign);
                         }
                     }
                     else
                     {
+                        // Erase the record since it's been too longer since their last join
                         savedRecords.erase(playerCallsign);
                     }
                 }
@@ -132,13 +135,15 @@ void ScoreRestorer::Event (bz_EventData *eventData)
         }
         break;
 
-        case bz_ePlayerPartEvent: // This event is called each time a player leaves a game
+        case bz_ePlayerPartEvent:
         {
             bz_PlayerJoinPartEventData_V1* partData = (bz_PlayerJoinPartEventData_V1*)eventData;
 
             // We'll store callsigns in lower case for sanity's sake
             std::string playerCallsign = bz_tolower(partData->record->callsign.c_str());
 
+            // Records will only not exist if this is the player's first time leaving or they are rejoining after being
+            // an observer.
             if (!savedRecords.count(playerCallsign))
             {
                 PlayerRecord newRecord;
@@ -150,7 +155,10 @@ void ScoreRestorer::Event (bz_EventData *eventData)
                 newRecord.teamKills = partData->record->teamKills;
                 newRecord.expireTime = bz_getCurrentTime();
 
-                savedRecords[playerCallsign] = newRecord;
+                if (newRecord.wins != 0 || newRecord.losses != 0)
+                {
+                    savedRecords[playerCallsign] = newRecord;
+                }
             }
         }
         break;
