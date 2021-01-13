@@ -103,11 +103,11 @@ void ScoreRestorer::Event (bz_EventData *eventData)
             {
                 PlayerRecord &record = savedRecords[playerCallsign];
 
-                // Verify their identity by checking the IP address
-                if (joinData->record->ipAddress == record.ipAddress)
+                // Make sure the record hasn't expired
+                if (record.expireTime + bz_getBZDBDouble(bzdb_saveTimeVar.c_str()) > bz_getCurrentTime())
                 {
-                    // Make sure the record hasn't expired
-                    if (record.expireTime + bz_getBZDBDouble(bzdb_saveTimeVar.c_str()) > bz_getCurrentTime())
+                    // Verify their identity by checking the IP address
+                    if (joinData->record->ipAddress == record.ipAddress)
                     {
                         if (joinData->record->team == eObservers)
                         {
@@ -126,11 +126,11 @@ void ScoreRestorer::Event (bz_EventData *eventData)
                             savedRecords.erase(playerCallsign);
                         }
                     }
-                    else
-                    {
-                        // Erase the record since it's been too longer since their last join
-                        savedRecords.erase(playerCallsign);
-                    }
+                }
+                else
+                {
+                    // Erase the record since it's been too longer since their last join
+                    savedRecords.erase(playerCallsign);
                 }
             }
         }
