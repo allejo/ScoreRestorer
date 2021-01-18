@@ -129,7 +129,7 @@ void ScoreRestorer::Event (bz_EventData *eventData)
                 }
                 else
                 {
-                    // Erase the record since it's been too longer since their last join
+                    // Erase the record since it's been too long since their last join
                     savedRecords.erase(playerCallsign);
                 }
             }
@@ -143,9 +143,12 @@ void ScoreRestorer::Event (bz_EventData *eventData)
             // We'll store callsigns in lower case for sanity's sake
             std::string playerCallsign = bz_tolower(partData->record->callsign.c_str());
 
-            // Records will only not exist if this is the player's first time leaving or they are rejoining after being
-            // an observer.
-            if (!savedRecords.count(playerCallsign))
+            // If an observer has a saved scored, extend their score expiration from the time they left as an observer
+            if (savedRecords.count(playerCallsign) > 0 && partData->record->team == eObservers)
+            {
+                savedRecords[playerCallsign].expireTime = bz_getCurrentTime();
+            }
+            else
             {
                 PlayerRecord newRecord;
 
@@ -156,6 +159,7 @@ void ScoreRestorer::Event (bz_EventData *eventData)
                 newRecord.teamKills = partData->record->teamKills;
                 newRecord.expireTime = bz_getCurrentTime();
 
+                // Only save a record if they've actually got kills and deaths to save
                 if (newRecord.wins != 0 || newRecord.losses != 0)
                 {
                     savedRecords[playerCallsign] = newRecord;
