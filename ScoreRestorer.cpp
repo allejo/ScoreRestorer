@@ -29,8 +29,8 @@ const std::string PLUGIN_NAME = "Score Restorer";
 
 const int MAJOR = 1;
 const int MINOR = 1;
-const int REV = 0;
-const int BUILD = 15;
+const int REV = 1;
+const int BUILD = 21;
 
 class ScoreRestorer : public bz_Plugin
 {
